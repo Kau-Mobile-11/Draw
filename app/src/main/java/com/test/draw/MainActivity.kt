@@ -14,7 +14,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         canvasView = findViewById(R.id.canvas)
-
+// hi
 //        clearCanvas.setOnClickListener(ClearCanvas(canvasView) as View.OnClickListener)
 
     }
