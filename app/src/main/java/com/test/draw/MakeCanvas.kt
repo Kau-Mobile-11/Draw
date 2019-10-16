@@ -2,6 +2,8 @@ package com.test.draw
 
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.content.Intent.getIntent
+import android.content.Intent.getIntentOld
 import android.graphics.*
 import android.util.AttributeSet
 import android.util.Log
@@ -12,6 +14,7 @@ import com.google.firebase.database.*
 
 class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(context, attrs) {
 
+    public var RoomNumber : String = ""
     private var mbitmap : Bitmap? = null
     private var mCanvas : Canvas? = null
     private var mPath : Path = Path()
@@ -91,7 +94,7 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
         //database.getReference("x").push().setValue(x) //  push()를 쓰면 누적 저장
         //database.getReference("y").push().setValue(y) //  위에 안쓴거는 계속 갱신
 
-        database.getReference("path").addValueEventListener(object : ValueEventListener {
+        database.getReference(RoomNumber).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(p0: DataSnapshot) {
                 var value = p0.value as Map<String, String>;
 
@@ -117,18 +120,18 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
             MotionEvent.ACTION_DOWN -> {
 //                onStartTouchEvent(x, y)
 //                invalidate()
-                database.getReference("path").setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "FIN" to "F", "START" to "T"))
+                database.getReference(RoomNumber).setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "FIN" to "F", "START" to "T"))
             }
             MotionEvent.ACTION_MOVE -> {
 //                onMoveTouchEvent(x, y)
 //                invalidate()
 
-                database.getReference("path").setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "FIN" to "F", "START" to "F"))
+                database.getReference(RoomNumber).setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "FIN" to "F", "START" to "F"))
             }
             MotionEvent.ACTION_UP -> {
 //                upTouchEvent()
 //                invalidate()
-                database.getReference("path").setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "FIN" to "T", "START" to "F"))
+                database.getReference(RoomNumber).setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "FIN" to "T", "START" to "F"))
             }
         }
 
