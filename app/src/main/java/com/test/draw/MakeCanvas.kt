@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import com.google.firebase.database.*
+import kotlin.reflect.typeOf
 
 
 class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(context, attrs) {
@@ -83,6 +84,7 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
 
     fun ClearCanvas(){
         mPath.reset()
+        database.getReference(RoomNumber).removeValue()
         invalidate()
     }
 
@@ -94,24 +96,68 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
         //database.getReference("x").push().setValue(x) //  push()를 쓰면 누적 저장
         //database.getReference("y").push().setValue(y) //  위에 안쓴거는 계속 갱신
 
-        database.getReference(RoomNumber).addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(p0: DataSnapshot) {
-                var value = p0.value as Map<String, String>;
+//        database.getReference(RoomNumber).addValueEventListener(object : ValueEventListener {
+//            override fun onDataChange(p0: DataSnapshot) {
+//                var value = p0.value as Map<String, String>;
+//
+//                if(value.getValue("FIN").equals("T")) {
+//                    upTouchEvent()
+//                    invalidate()
+//                }else if(value.getValue("START").equals("T")){
+//                    onStartTouchEvent(value.getValue("X").toFloat(), value.getValue("Y").toFloat())
+//                    invalidate()
+//                }else{
+//                    onMoveTouchEvent(value.getValue("X").toFloat(), value.getValue("Y").toFloat())
+//                    invalidate()
+//                }
+//            }
+//
+//            override fun onCancelled(p0: DatabaseError) {
+//                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//            }
+//
+//        })
 
-                if(value.getValue("FIN").equals("T")) {
-                    upTouchEvent()
-                    invalidate()
-                }else if(value.getValue("START").equals("T")){
-                    onStartTouchEvent(value.getValue("X").toFloat(), value.getValue("Y").toFloat())
-                    invalidate()
-                }else{
-                    onMoveTouchEvent(value.getValue("X").toFloat(), value.getValue("Y").toFloat())
-                    invalidate()
+
+        database.getReference(RoomNumber).addChildEventListener(object : ChildEventListener{
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onChildMoved(p0: DataSnapshot, p1: String?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onChildChanged(p0: DataSnapshot, p1: String?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+            }
+
+            override fun onChildAdded(p0: DataSnapshot, p1: String?) {
+                try {
+                    var value = p0.value as Map<String, String>;
+
+                    if (value.getValue("FIN").equals("T")) {
+                        upTouchEvent()
+                        invalidate()
+                    } else if (value.getValue("START").equals("T")) {
+                        onStartTouchEvent(
+                            value.getValue("X").toFloat(),
+                            value.getValue("Y").toFloat()
+                        )
+                        invalidate()
+                    } else {
+                        onMoveTouchEvent(
+                            value.getValue("X").toFloat(),
+                            value.getValue("Y").toFloat()
+                        )
+                        invalidate()
+                    }
+                }catch(e : Exception){
                 }
             }
 
-            override fun onCancelled(p0: DatabaseError) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            override fun onChildRemoved(p0: DataSnapshot) {
             }
 
         })
@@ -120,19 +166,20 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
             MotionEvent.ACTION_DOWN -> {
 //                onStartTouchEvent(x, y)
 //                invalidate()
-                database.getReference(RoomNumber).setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "FIN" to "F", "START" to "T"))
+                database.getReference(RoomNumber).push().setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "FIN" to "F", "START" to "T"))
             }
             MotionEvent.ACTION_MOVE -> {
 //                onMoveTouchEvent(x, y)
 //                invalidate()
 
-                database.getReference(RoomNumber).setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "FIN" to "F", "START" to "F"))
+                database.getReference(RoomNumber).push().setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "FIN" to "F", "START" to "F"))
             }
             MotionEvent.ACTION_UP -> {
 //                upTouchEvent()
 //                invalidate()
-                database.getReference(RoomNumber).setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "FIN" to "T", "START" to "F"))
+                database.getReference(RoomNumber).push().setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "FIN" to "T", "START" to "F"))
             }
+
         }
 
         return true

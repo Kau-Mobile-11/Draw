@@ -6,5 +6,6 @@
             android:id="@+id/erase"
             android:icon="@android:drawable/checkbox_off_background"
             android:title="Erase"
-            app:showAsAction="always" android:visible="false"/>
+            android:visible="false"
+            app:showAsAction="always" />
 </menu>
