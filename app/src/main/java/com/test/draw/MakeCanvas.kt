@@ -74,7 +74,7 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
     }
 
     private fun upTouchEvent(){
-        //mPath.lineTo(mX,mY)
+        mPath.lineTo(mX,mY)
         Finished = true
         arrivedX = false;
         arrivedY = false;
@@ -83,11 +83,8 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
     }
 
     fun ClearCanvas(){
-        mPath.reset()
         database.getReference(RoomNumber).removeValue()
-        invalidate()
     }
-
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val x = event.x
@@ -158,6 +155,8 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
             }
 
             override fun onChildRemoved(p0: DataSnapshot) {
+                mPath.reset()
+                invalidate()
             }
 
         })
