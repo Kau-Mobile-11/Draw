@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
 
 //        clearCanvas.setOnClickListener(ClearCanvas(canvasView) as View.OnClickListener)
 
-        enter.setOnClickListener{
+        create.setOnClickListener{
             val intent = Intent(this, EnterActivity::class.java)
             startActivity(intent)
         }

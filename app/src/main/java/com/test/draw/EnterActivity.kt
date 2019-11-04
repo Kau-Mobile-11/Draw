@@ -5,29 +5,22 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.widget.EditText
 import android.widget.Toast
-import kotlinx.android.synthetic.main.activity_enter.*
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_create_room.*
 
 class EnterActivity : AppCompatActivity(){
     lateinit var canvasView: CanvasView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_enter)
+        setContentView(R.layout.activity_create_room)
 
         //canvasView = findViewById(R.id.canvas)
 
 //        clearCanvas.setOnClickListener(ClearCanvas(canvasView) as View.OnClickListener)
 
-        enterButton.setOnClickListener{
+        create_room_button.setOnClickListener{
             if(!findViewById<EditText>(R.id.RoomText).text.isNullOrEmpty()) {
                 val intent = Intent(this, CanvasActivity::class.java)
                 intent.putExtra("ROOMNUMBER", findViewById<EditText>(R.id.RoomText).text.toString())

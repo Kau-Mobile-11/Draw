@@ -10,12 +10,51 @@
         tools:context="com.test.draw.CanvasActivity">
 
     <com.test.draw.CanvasView
-            android:id = "@+id/canvas"
+            android:id="@+id/canvas"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentTop="true"
-    />
+            android:layout_alignParentTop="true" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <androidx.appcompat.widget.Toolbar
+                android:id="@+id/bottom_tool"
+                android:layout_width="409dp"
+                android:layout_height="wrap_content"
+                android:background="#030904"
+                android:minHeight="?attr/actionBarSize"
+                android:theme="?attr/actionBarTheme"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+
+        <ImageButton
+                android:id="@+id/image_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="230dp"
+                android:layout_marginEnd="50dp"
+                app:layout_constraintBottom_toBottomOf="@id/bottom_tool"
+                app:layout_constraintEnd_toEndOf="@+id/bottom_tool"
+                app:layout_constraintStart_toStartOf="@+id/bottom_tool"
+                app:layout_constraintTop_toTopOf="@id/bottom_tool"
+                app:srcCompat="@android:drawable/ic_menu_gallery" />
+
+        <ImageButton
+                android:id="@+id/recording_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="230dp"
+                app:layout_constraintBottom_toBottomOf="@id/bottom_tool"
+                app:layout_constraintEnd_toEndOf="@+id/bottom_tool"
+                app:layout_constraintStart_toStartOf="@+id/bottom_tool"
+                app:layout_constraintTop_toTopOf="@id/bottom_tool"
+                app:srcCompat="@android:drawable/presence_video_online" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </RelativeLayout>
