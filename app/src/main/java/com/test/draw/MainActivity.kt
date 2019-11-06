@@ -21,10 +21,14 @@ class MainActivity : AppCompatActivity() {
 //        clearCanvas.setOnClickListener(ClearCanvas(canvasView) as View.OnClickListener)
 
         create.setOnClickListener{
-            val intent = Intent(this, EnterActivity::class.java)
+            val intent = Intent(this, MakeRoomActivity::class.java)
             startActivity(intent)
         }
 
+        enter.setOnClickListener{
+            val intent = Intent(this, EnterActivity::class.java)
+            startActivity(intent)
+        }
     }
 
 //    fun ClearCanvas(view: View) {
