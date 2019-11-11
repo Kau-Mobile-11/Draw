@@ -5,15 +5,15 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".EnterActivity">
+        tools:context=".MakeRoomActivity">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <EditText
-                android:id="@+id/RoomText"
+        <TextView
+                android:id="@+id/MakeRoomText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -28,7 +28,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
-                android:id="@+id/password"
+                android:id="@+id/MakePassword"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -40,7 +40,7 @@
                 app:layout_constraintTop_toBottomOf="@id/roompass" />
 
         <EditText
-                android:id="@+id/NickName"
+                android:id="@+id/MakeNickName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -55,19 +55,19 @@
                 android:id="@+id/roompass"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintBottom_toTopOf="@id/password"
+                app:layout_constraintBottom_toTopOf="@id/MakePassword"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/RoomText" />
+                app:layout_constraintTop_toBottomOf="@id/MakeRoomText" />
 
         <Space
                 android:id="@+id/passnick"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintBottom_toTopOf="@id/NickName"
+                app:layout_constraintBottom_toTopOf="@id/MakeNickName"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/password" />
+                app:layout_constraintTop_toBottomOf="@id/MakePassword" />
 
         <Button
                 android:id="@+id/create_room_button"
@@ -79,7 +79,7 @@
                 app:layout_constraintHorizontal_bias="0.498"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/NickName" />
+                app:layout_constraintTop_toBottomOf="@id/MakeNickName" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
