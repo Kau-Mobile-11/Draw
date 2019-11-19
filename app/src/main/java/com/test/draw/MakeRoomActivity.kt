@@ -65,6 +65,7 @@ class MakeRoomActivity : AppCompatActivity(){
         create_room_button.setOnClickListener{
             if(!RoomText.text.isNullOrEmpty() && !NicknameText.text.isNullOrEmpty()) {
                 database.getReference("RoomsInfo").push().setValue(mapOf("RoomNumber" to ""+RoomNumber, "Password" to PasswordText.text.toString()))
+                database.getReference(RoomText.text.toString()).child("PEOPLENUMBER").setValue(0)
                 val intent = Intent(this, CanvasActivity::class.java)
                 intent.putExtra("ROOMNUMBER", RoomText.text.toString())
                 startActivity(intent)

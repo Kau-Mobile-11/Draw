@@ -12,13 +12,16 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.UriMatcher
+import android.graphics.Path
 import android.net.Uri
 import android.nfc.Tag
+import android.renderscript.Sampler
 import android.util.Log
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
+import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
@@ -33,14 +36,104 @@ class CanvasActivity : AppCompatActivity() {
     private var filePath : Uri? = null
     val storage : FirebaseStorage = FirebaseStorage.getInstance()
     var filename : String = ""
+    val database : FirebaseDatabase = FirebaseDatabase.getInstance()  // firebase db의 인스턴스를 가져옴
+    val childlistener = object : ChildEventListener{
+        override fun onCancelled(p0: DatabaseError) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun onChildMoved(p0: DataSnapshot, p1: String?) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun onChildChanged(p0: DataSnapshot, p1: String?) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+        }
+
+        override fun onChildAdded(p0: DataSnapshot, p1: String?) {
+            try {
+                var value = p0.value as Map<String, String>;
+
+                if (value.getValue("FIN").equals("T")) {
+                    canvasView.upTouchEvent(Integer.parseInt(value.getValue("NUM")))
+                    canvasView.invalidate()
+                } else if (value.getValue("START").equals("T")) {
+                    canvasView.onStartTouchEvent(
+                        value.getValue("X").toFloat(),
+                        value.getValue("Y").toFloat(),
+                        Integer.parseInt(value.getValue("NUM"))
+                    )
+                    canvasView.invalidate()
+                } else {
+                    canvasView.onMoveTouchEvent(
+                        value.getValue("X").toFloat(),
+                        value.getValue("Y").toFloat(),
+                        Integer.parseInt(value.getValue("NUM"))
+                    )
+                    canvasView.invalidate()
+                }
+            }catch(e : Exception){
+            }
+        }
+
+        override fun onChildRemoved(p0: DataSnapshot) {
+            canvasView.removeAll()
+            canvasView.invalidate()
+        }
+    }
 
     lateinit var canvasView: CanvasView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_canvas)
+        val RoomNumber = intent.getStringExtra("ROOMNUMBER")
 
         canvasView = findViewById(R.id.canvas)
+
+        database.getReference(RoomNumber).child("PEOPLENUMBER").addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                val value = p0.value as Long
+
+                canvasView.myNum = "" + (value.toInt() + 1)
+
+                database.getReference(RoomNumber).child("PEOPLENUMBER").setValue(value + 1)
+
+                canvasView.mPath.add(Path())
+                canvasView.mX.add(0.toFloat())
+                canvasView.mY.add(0.toFloat())
+                canvasView.Finished.add(false)
+                for(i : Int in 1..value.toInt()){
+                    database.getReference(RoomNumber).child("PATHS").child(""+i).addChildEventListener(childlistener)
+                    canvasView.mPath.add(Path())
+                    canvasView.mX.add(0.toFloat())
+                    canvasView.mY.add(0.toFloat())
+                    canvasView.Finished.add(false)
+                }
+            }
+        })
+
+        database.getReference(RoomNumber).child("PEOPLENUMBER").addValueEventListener(object : ValueEventListener{
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                val value = p0.value as Long
+
+                database.getReference(RoomNumber).child("PATHS").child("" + value.toInt()).addChildEventListener(childlistener)
+                canvasView.mPath.add(Path())
+                canvasView.mX.add(0.toFloat())
+                canvasView.mY.add(0.toFloat())
+                canvasView.Finished.add(false)
+            }
+
+        })
 
         if(!intent.getStringExtra("ROOMNUMBER").isNullOrBlank()) {
             canvasView.RoomNumber = intent.getStringExtra("ROOMNUMBER")
