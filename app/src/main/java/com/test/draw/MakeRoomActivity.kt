@@ -10,10 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_create_room.*
 
 class MakeRoomActivity : AppCompatActivity(){
@@ -35,36 +32,25 @@ class MakeRoomActivity : AppCompatActivity(){
 
 //        clearCanvas.setOnClickListener(ClearCanvas(canvasView) as View.OnClickListener)
 
-        database.getReference("RoomsInfo").addChildEventListener(object : ChildEventListener{
+        database.getReference("ROOMSNUMBER").addListenerForSingleValueEvent(object : ValueEventListener{
             override fun onCancelled(p0: DatabaseError) {
                 TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
             }
 
-            override fun onChildMoved(p0: DataSnapshot, p1: String?) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
+            override fun onDataChange(p0: DataSnapshot) {
+                if(p0.value == null) RoomNumber = 1
+                else RoomNumber = p0.value as Long + 1
 
-            override fun onChildChanged(p0: DataSnapshot, p1: String?) {
-            }
+                RoomText.text = RoomNumber.toString()
 
-            override fun onChildAdded(p0: DataSnapshot, p1: String?) {
-                val data = p0.value as Map<String, String>
-                val temp = data["RoomNumber"]?.toLong()
-
-                if(temp != null && RoomNumber <= temp) RoomNumber = temp + 1
-
-                RoomText.text = "" + RoomNumber
-            }
-
-            override fun onChildRemoved(p0: DataSnapshot) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                database.getReference("ROOMSNUMBER").setValue(RoomNumber)
             }
 
         })
 
         create_room_button.setOnClickListener{
             if(!RoomText.text.isNullOrEmpty() && !NicknameText.text.isNullOrEmpty()) {
-                database.getReference("RoomsInfo").push().setValue(mapOf("RoomNumber" to ""+RoomNumber, "Password" to PasswordText.text.toString()))
+                database.getReference("ROOMSINFO").child("" + RoomNumber).setValue(PasswordText.text.toString())
                 database.getReference(RoomText.text.toString()).child("PEOPLENUMBER").setValue(0)
                 val intent = Intent(this, CanvasActivity::class.java)
                 intent.putExtra("ROOMNUMBER", RoomText.text.toString())

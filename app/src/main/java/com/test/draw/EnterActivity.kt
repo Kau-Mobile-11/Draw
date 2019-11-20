@@ -11,10 +11,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_create_room.*
 
 class EnterActivity : AppCompatActivity(){
@@ -36,32 +33,25 @@ class EnterActivity : AppCompatActivity(){
         fun Check() {
             val database : FirebaseDatabase = FirebaseDatabase.getInstance()
 
-            database.getReference("RoomsInfo").addChildEventListener(object : ChildEventListener{
+            database.getReference("ROOMSINFO").child(""+RoomText.text.toString()).addListenerForSingleValueEvent(object : ValueEventListener{
                 override fun onCancelled(p0: DatabaseError) {
                     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                 }
 
-                override fun onChildMoved(p0: DataSnapshot, p1: String?) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
+                override fun onDataChange(p0: DataSnapshot) {
+                    if(p0.value == null){
+                        Toast.makeText(ThisClass, "없는 방입니다.", Toast.LENGTH_SHORT).show()
+                        return
+                    }
+                    val password = p0.value as String
 
-                override fun onChildChanged(p0: DataSnapshot, p1: String?) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
-
-                override fun onChildAdded(p0: DataSnapshot, p1: String?) {
-                    val data = p0.value as Map<String, String>
-                    val RoomNumber = data["RoomNumber"]
-                    val str = data["Password"]
-                    if(RoomText.text.toString().equals(RoomNumber) && PasswordText.text.toString().equals(str)){
+                    if(password.equals(PasswordText.text.toString())){
                         val intent = Intent(ThisClass, CanvasActivity::class.java)
                         intent.putExtra("ROOMNUMBER", RoomText.text.toString())
                         startActivity(intent)
+                    }else{
+                        Toast.makeText(ThisClass, "비밀번호를 잘못 입력하셨습니다.", Toast.LENGTH_SHORT).show()
                     }
-                }
-
-                override fun onChildRemoved(p0: DataSnapshot) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                 }
 
             })
