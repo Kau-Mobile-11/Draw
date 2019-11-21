@@ -12,6 +12,8 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.UriMatcher
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Path
 import android.net.Uri
 import android.nfc.Tag
@@ -135,6 +137,21 @@ class CanvasActivity : AppCompatActivity() {
 
         })
 
+        database.getReference(RoomNumber).child("imageName").addValueEventListener(object : ValueEventListener{
+            override fun onDataChange(p0: DataSnapshot) {
+                filename = p0.value as String
+                Log.i("filename",filename)
+                if(filename != "") {
+                    downloadFile()
+                }
+            }
+
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+        })
+
         if(!intent.getStringExtra("ROOMNUMBER").isNullOrBlank()) {
             canvasView.RoomNumber = intent.getStringExtra("ROOMNUMBER")
             Toast.makeText(this,intent.getStringExtra("ROOMNUMBER")+"번 방 입장",Toast.LENGTH_SHORT).show()
@@ -199,7 +216,7 @@ class CanvasActivity : AppCompatActivity() {
             }
             uploadFile()
 
-            image_view.setImageURI(data?.data)
+            //image_view.setImageURI(data?.data)
         }
     }
 
@@ -209,16 +226,26 @@ class CanvasActivity : AppCompatActivity() {
             val formatter : SimpleDateFormat = SimpleDateFormat("yyyyMMHH_mmss")
             val now : Date = Date()
 
-            filename = formatter.format(now)
-            val storageRef : StorageReference = storage.getReferenceFromUrl("gs://fir-c771c.appspot.com/").child(filename)
+            filename = formatter.format(now) + ".png"
+            val storageRef : StorageReference = storage.getReferenceFromUrl("gs://fir-c771c.appspot.com/").child("images/" + filename)
             storageRef.putFile(filePath!!)
-                .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot>() { downloadFile() })
+                .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot>() { database.getReference(canvasView.RoomNumber).child("imageName").setValue(filename)})
         }
     }
     private fun downloadFile(){
-
-
+        val storageRef : StorageReference = storage.reference.child("images").child(filename)
+        var ONE_MEGABYTE: Long = 1024 * 1024
+        storageRef?.getBytes(ONE_MEGABYTE).addOnCompleteListener {
+            image_view.setImageBitmap(byteArrayToBitmap(it.result!!))
+        }
+        //GlideApp.with(this).load(storageRef).into(image_view)
     }
+    private fun byteArrayToBitmap(byteArry: ByteArray): Bitmap {
+        var bitmap:Bitmap?=null
+        bitmap = BitmapFactory.decodeByteArray(byteArry,0,byteArry.size)
+        return bitmap
+    }
+
 
 
 //    fun ClearCanvas(view: View) {
@@ -239,5 +266,6 @@ class CanvasActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
 
     }
+
 
 }

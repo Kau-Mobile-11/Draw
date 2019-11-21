@@ -57,17 +57,6 @@
                 app:layout_constraintTop_toTopOf="@id/bottom_tool"
                 app:srcCompat="@android:drawable/ic_menu_gallery" />
 
-        <ImageButton
-                android:id="@+id/recording_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="230dp"
-                app:layout_constraintBottom_toBottomOf="@id/bottom_tool"
-                app:layout_constraintEnd_toEndOf="@+id/bottom_tool"
-                app:layout_constraintStart_toStartOf="@+id/bottom_tool"
-                app:layout_constraintTop_toTopOf="@id/bottom_tool"
-                app:srcCompat="@android:drawable/presence_video_online" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

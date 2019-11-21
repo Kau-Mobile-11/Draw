@@ -52,6 +52,7 @@ class MakeRoomActivity : AppCompatActivity(){
             if(!RoomText.text.isNullOrEmpty() && !NicknameText.text.isNullOrEmpty()) {
                 database.getReference("ROOMSINFO").child("" + RoomNumber).setValue(PasswordText.text.toString())
                 database.getReference(RoomText.text.toString()).child("PEOPLENUMBER").setValue(0)
+                database.getReference(RoomText.text.toString()).child("imageName").setValue("")
                 val intent = Intent(this, CanvasActivity::class.java)
                 intent.putExtra("ROOMNUMBER", RoomText.text.toString())
                 startActivity(intent)
