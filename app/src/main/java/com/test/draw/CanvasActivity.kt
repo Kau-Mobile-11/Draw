@@ -177,6 +177,10 @@ class CanvasActivity : AppCompatActivity() {
             }
         }
 
+        image_clear.setOnClickListener{
+            image_view.setImageResource(0)
+        }
+
 //        clearCanvas.setOnClickListener(ClearCanvas(canvasView) as View.OnClickListener)
 
     }
