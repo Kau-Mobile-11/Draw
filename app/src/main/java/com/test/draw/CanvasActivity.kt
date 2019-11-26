@@ -137,8 +137,20 @@ class CanvasActivity : AppCompatActivity() {
 
         })
 
-        database.getReference(RoomNumber).child("imageName").addValueEventListener(object : ValueEventListener{
-            override fun onDataChange(p0: DataSnapshot) {
+        database.getReference(RoomNumber).child("imageName").addChildEventListener(object : ChildEventListener{
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onChildMoved(p0: DataSnapshot, p1: String?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onChildChanged(p0: DataSnapshot, p1: String?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onChildAdded(p0: DataSnapshot, p1: String?) {
                 filename = p0.value as String
                 Log.i("filename",filename)
                 if(filename != "") {
@@ -146,8 +158,8 @@ class CanvasActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onCancelled(p0: DatabaseError) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            override fun onChildRemoved(p0: DataSnapshot) {
+                image_view.setImageResource(0)
             }
 
         })
@@ -178,7 +190,7 @@ class CanvasActivity : AppCompatActivity() {
         }
 
         image_clear.setOnClickListener{
-            image_view.setImageResource(0)
+            database.getReference(RoomNumber).child("imageName").removeValue()
         }
 
 //        clearCanvas.setOnClickListener(ClearCanvas(canvasView) as View.OnClickListener)
@@ -233,7 +245,7 @@ class CanvasActivity : AppCompatActivity() {
             filename = formatter.format(now) + ".png"
             val storageRef : StorageReference = storage.getReferenceFromUrl("gs://fir-c771c.appspot.com/").child("images/" + filename)
             storageRef.putFile(filePath!!)
-                .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot>() { database.getReference(canvasView.RoomNumber).child("imageName").setValue(filename)})
+                .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot>() { database.getReference(canvasView.RoomNumber).child("imageName").push().setValue(filename)})
         }
     }
     private fun downloadFile(){
