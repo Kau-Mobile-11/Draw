@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.TextView
 import com.google.firebase.database.*
 import kotlin.reflect.typeOf
 
@@ -26,6 +27,7 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
     public var myNum = "0"
     val database : FirebaseDatabase = FirebaseDatabase.getInstance()  // firebase db의 인스턴스를 가져옴
 
+    var text_view : TextView? = null
 
 
     init {
@@ -50,6 +52,7 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
 
         mbitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         mCanvas = Canvas(mbitmap)
+
     }
 
     public fun onStartTouchEvent(x: Float, y:Float, num:Int) {
@@ -86,7 +89,7 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
         }
     }
 
-    fun ClearCanvas(){
+    fun ClearCanvas() {
         database.getReference(RoomNumber).child("PATHS").removeValue()
     }
 
