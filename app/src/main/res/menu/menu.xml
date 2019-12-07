@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:android="http://schemas.android.com/apk/res/android">
-
+<!--
     <item
             android:id="@+id/erase"
             android:icon="@android:drawable/checkbox_off_background"
             android:title="Erase"
             app:showAsAction="always" />
+            -->
+    <item android:id="@+id/pen" android:title="펜"/>
+    <item android:id="@+id/erase" android:title="지우개"/>
+    <item android:id="@+id/erase_all" android:title="전체 지우개"/>
+    <item android:id="@+id/input_image" android:title="이미지 첨부"/>
+    <item android:id="@+id/image_delete" android:title="이미지 지우기"/>
+    <item android:id="@+id/recording" android:title="녹화 시작"/>
+    <item android:id="@+id/pointer" android:title="마우스 포인터"/>
 </menu>
