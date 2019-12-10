@@ -12,6 +12,22 @@ import android.view.View
 import android.widget.TextView
 import com.google.firebase.database.*
 import kotlin.reflect.typeOf
+import android.R.attr.bottom
+import android.R.attr.right
+import android.R.attr.top
+import android.R.attr.left
+import android.graphics.RectF
+import android.R.attr.y
+import android.R.attr.x
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
+
+
+
+
 
 
 class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(context, attrs) {
@@ -24,7 +40,12 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
     public var mX = ArrayList<Float>()
     public var mY = ArrayList<Float>()
     public var Finished = ArrayList<Boolean>()
-    public var myNum = "0"
+    public var lineNum = "0"
+    private var eraseX = 0f
+    private var eraseY = 0f
+    private var myNum = "0"
+    public var penOption = 0
+    private var erasePath = Path()
     val database : FirebaseDatabase = FirebaseDatabase.getInstance()  // firebase db의 인스턴스를 가져옴
 
     var text_view : TextView? = null
@@ -87,10 +108,41 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
         for(i in mPath){
             i.reset()
         }
+        invalidate()
     }
 
     fun ClearCanvas() {
-        database.getReference(RoomNumber).child("PATHS").removeValue()
+        database.getReference(RoomNumber).child("ERASE").push().setValue(-1)
+        for(i in 0..(Integer.parseInt(lineNum)-1)){
+            database.getReference(RoomNumber).child("PATHS").child("" + i).removeValue()
+        }
+    }
+
+    public fun ErasePath(pathIndex : Int) {
+        mPath[pathIndex].reset()
+        invalidate()
+    }
+
+    fun findEraseLine(x:Float, y:Float) {
+        val padding = 10f
+        val touchPoint = RectF(x, y, x + padding, y + padding)
+        val touchPointPath = Path()
+        touchPointPath.addRect(touchPoint, Path.Direction.CW)
+        for (i in 0..(mPath.size - 1)) {
+            val hourPath = mPath[i]
+            touchPointPath.addCircle(x, y, padding, Path.Direction.CW)
+            touchPointPath.close()
+            val hourPathCopy = Path(hourPath)
+            val intersectResult = hourPathCopy.op(touchPointPath, Path.Op.INTERSECT)
+            touchPointPath.reset()
+            val bounds = RectF()
+            hourPathCopy.computeBounds(bounds, true)
+            //      Log.d(TAG, "intersectResult: " + intersectResult + " different?: " + bounds.left+","+bounds.top+","+bounds.right+","+bounds.bottom);
+            if (bounds.left.toDouble() != 0.0 && bounds.top.toDouble() != 0.0 && bounds.right.toDouble() != 0.0 && bounds.bottom.toDouble() != 0.0) {
+                database.getReference(RoomNumber).child("ERASE").push().setValue(i)
+                database.getReference(RoomNumber).child("PATHS").child("" + i).removeValue()
+            }
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -122,24 +174,49 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
 //
 //        })
 
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
+        if(penOption == 0){
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
 //                onStartTouchEvent(x, y)
 //                invalidate()
-                database.getReference(RoomNumber).child("PATHS").child(""+myNum).push().setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "NUM" to myNum, "FIN" to "F", "START" to "T"))
-            }
-            MotionEvent.ACTION_MOVE -> {
+                    myNum = lineNum
+                    database.getReference(RoomNumber).child("PEOPLENUMBER").setValue(Integer.parseInt(myNum).toLong() + 1)
+                    database.getReference(RoomNumber).child("PATHS").child(""+myNum).push().setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "NUM" to myNum, "FIN" to "F", "START" to "T"))
+                }
+                MotionEvent.ACTION_MOVE -> {
 //                onMoveTouchEvent(x, y)
 //                invalidate()
 
-                database.getReference(RoomNumber).child("PATHS").child(""+myNum).push().setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "NUM" to myNum, "FIN" to "F", "START" to "F"))
+                    database.getReference(RoomNumber).child("PATHS").child(""+myNum).push().setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "NUM" to myNum, "FIN" to "F", "START" to "F"))
+                }
+                MotionEvent.ACTION_UP -> {
+//                  upTouchEvent()
+//                  invalidate()
+                    database.getReference(RoomNumber).child("PATHS").child(""+myNum).push().setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "NUM" to myNum, "FIN" to "T", "START" to "F"))
+                }
+
             }
-            MotionEvent.ACTION_UP -> {
-//                upTouchEvent()
-//                invalidate()
-                database.getReference(RoomNumber).child("PATHS").child(""+myNum).push().setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "NUM" to myNum, "FIN" to "T", "START" to "F"))
+        }else if(penOption == 1){
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    eraseX = x
+                    eraseY = y
+                }
             }
 
+            var dx = (x.toFloat() - eraseX)
+            var dy = (y.toFloat() - eraseY)
+
+            val len = Math.sqrt(1.0*dx*dx + dy*dy)
+
+            dx /= len.toFloat()
+            dy /= len.toFloat()
+
+            while(Math.abs(x - eraseX) > 6 || Math.abs(y - eraseY) > 6){
+                findEraseLine(eraseX, eraseY)
+                eraseX += 6 * dx
+                eraseY += 6 * dy
+            }
         }
 
         return true

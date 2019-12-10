@@ -100,8 +100,6 @@ class CanvasActivity : AppCompatActivity(){
         }
 
         override fun onChildRemoved(p0: DataSnapshot) {
-            canvasView.removeAll()
-            canvasView.invalidate()
         }
     }
     
@@ -127,9 +125,7 @@ class CanvasActivity : AppCompatActivity(){
             override fun onDataChange(p0: DataSnapshot) {
                 val value = p0.value as Long
 
-                canvasView.myNum = "" + (value.toInt() + 1)
-
-                database.getReference(RoomNumber).child("PEOPLENUMBER").setValue(value + 1)
+                canvasView.lineNum = "" + value.toInt()
 
                 canvasView.mPath.add(Path())
                 canvasView.mX.add(0.toFloat())
@@ -152,6 +148,7 @@ class CanvasActivity : AppCompatActivity(){
             override fun onDataChange(p0: DataSnapshot) {
                 val value = p0.value as Long
 
+                canvasView.lineNum = "" + value.toInt()
                 database.getReference(RoomNumber).child("PATHS").child("" + value.toInt()).addChildEventListener(childlistener)
                 canvasView.mPath.add(Path())
                 canvasView.mX.add(0.toFloat())
@@ -191,6 +188,34 @@ class CanvasActivity : AppCompatActivity(){
 
         })
 
+        database.getReference(RoomNumber).child("ERASE").addChildEventListener(object : ChildEventListener{
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onChildMoved(p0: DataSnapshot, p1: String?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onChildChanged(p0: DataSnapshot, p1: String?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onChildAdded(p0: DataSnapshot, p1: String?) {
+                val option = p0.value as Long
+
+                if(option == -1L){
+                    canvasView.removeAll()
+                }else{
+                    canvasView.ErasePath(option.toInt())
+                }
+            }
+
+            override fun onChildRemoved(p0: DataSnapshot) {
+            }
+
+        })
+
         if(!intent.getStringExtra("ROOMNUMBER").isNullOrBlank()) {
             canvasView.RoomNumber = intent.getStringExtra("ROOMNUMBER")
             Toast.makeText(this,intent.getStringExtra("ROOMNUMBER")+"번 방 입장",Toast.LENGTH_SHORT).show()
@@ -198,6 +223,7 @@ class CanvasActivity : AppCompatActivity(){
             Toast.makeText(this,"실패",Toast.LENGTH_SHORT).show()
             return
         }
+
         /*
         image_button.setOnClickListener {
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -513,8 +539,12 @@ class CanvasActivity : AppCompatActivity(){
                 onToggleScreenShare()
             }
 
-            //R.id.pen -> {}
-            //R.id.erase -> {}
+            R.id.pen -> {
+                canvasView.penOption = 0
+            }
+            R.id.erase -> {
+                canvasView.penOption = 1
+            }
             //R.id.pointer -> {}
         }
         return super.onOptionsItemSelected(item)
