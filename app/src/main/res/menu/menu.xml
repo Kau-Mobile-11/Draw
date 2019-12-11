@@ -15,4 +15,5 @@
     <item android:id="@+id/image_delete" android:title="이미지 지우기"/>
     <item android:id="@+id/recording" android:title="녹화 시작"/>
     <item android:id="@+id/pointer" android:title="마우스 포인터"/>
+    <item android:id="@+id/erase_pointer" android:title="포인터 지우기"/>
 </menu>

@@ -103,6 +103,23 @@ class CanvasActivity : AppCompatActivity(){
         override fun onChildRemoved(p0: DataSnapshot) {
         }
     }
+
+    var PointListener = object : ValueEventListener{
+        override fun onCancelled(p0: DatabaseError) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun onDataChange(p0: DataSnapshot) {
+            try {
+                val value = p0.value as Map<String, String>
+                val x = value.getValue("X").toFloat()
+                val y = value.getValue("Y").toFloat()
+                val pointerNumber = Integer.parseInt(value.getValue("NUM"))
+
+                canvasView.setPointer(pointerNumber, x, y)
+            }catch(e : Exception){}
+        }
+    }
     
     lateinit var canvasView: CanvasView
 
@@ -128,11 +145,7 @@ class CanvasActivity : AppCompatActivity(){
 
                 canvasView.lineNum = "" + value.toInt()
 
-                canvasView.mPath.add(Path())
-                canvasView.mX.add(0.toFloat())
-                canvasView.mY.add(0.toFloat())
-                canvasView.Finished.add(false)
-                for(i : Int in 1..value.toInt()){
+                for(i : Int in 0..value.toInt()){
                     database.getReference(RoomNumber).child("PATHS").child(""+i).addChildEventListener(childlistener)
                     canvasView.mPath.add(Path())
                     canvasView.mX.add(0.toFloat())
@@ -158,6 +171,48 @@ class CanvasActivity : AppCompatActivity(){
             }
 
         })
+
+        database.getReference(RoomNumber).child("POINTERNUM").addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                try {
+                    val value = p0.value as Long
+
+                    canvasView.PointerNum = "" + value
+
+                    for (i in 0..(value-1)) {
+                        database.getReference(RoomNumber).child("POINTERS").child("" + (i - 1)).addValueEventListener(PointListener)
+                        canvas.mPointer.add(Path())
+                        canvasView.PointerX.add(0.toFloat())
+                        canvasView.PointerY.add(0.toFloat())
+                        canvasView.PointerVisible.add(true)
+                    }
+                }catch(e : Exception){}
+            }
+
+        })
+
+        database.getReference(RoomNumber).child("POINTERNUM").addValueEventListener(object : ValueEventListener{
+            override fun onCancelled(p0: DatabaseError) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                val value = p0.value as Long
+
+                canvasView.PointerNum = "" + value
+
+                database.getReference(RoomNumber).child("POINTERS").child("" + (value - 1)).addValueEventListener(PointListener)
+                canvas.mPointer.add(Path())
+                canvasView.PointerX.add(0.toFloat())
+                canvasView.PointerY.add(0.toFloat())
+                canvasView.PointerVisible.add(true)
+            }
+        })
+
         database.getReference(RoomNumber).child("imageName").addChildEventListener(object : ChildEventListener{
             override fun onCancelled(p0: DatabaseError) {
                 TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -207,7 +262,12 @@ class CanvasActivity : AppCompatActivity(){
 
                 if(option == -1L){
                     canvasView.removeAll()
-                }else{
+                }else if(option > 10000000) {
+                    for(i in 10000000..option){
+                        canvasView.clearPointer((i - 10000000).toInt())
+                        database.getReference(RoomNumber).child("POINTERS").child((i - 10000000).toString()).removeValue()
+                    }
+                }else {
                     canvasView.ErasePath(option.toInt())
                 }
             }
@@ -216,6 +276,7 @@ class CanvasActivity : AppCompatActivity(){
             }
 
         })
+
 
         if(!intent.getStringExtra("ROOMNUMBER").isNullOrBlank()) {
             canvasView.RoomNumber = intent.getStringExtra("ROOMNUMBER")
@@ -558,7 +619,14 @@ class CanvasActivity : AppCompatActivity(){
             R.id.erase -> {
                 canvasView.penOption = 1
             }
-            //R.id.pointer -> {}
+            R.id.pointer -> {
+                canvasView.penOption = 2;
+                canvasView.myPointer = canvasView.PointerNum
+                database.getReference(RoomNumber).child("POINTERNUM").setValue(Integer.parseInt(canvasView.PointerNum) + 1)
+            }
+            R.id.erase_pointer -> {
+                database.getReference(RoomNumber).child("ERASE").push().setValue(Integer.parseInt(canvas.PointerNum) + 10000000 - 1)
+            }
         }
         return super.onOptionsItemSelected(item)
 

@@ -37,15 +37,20 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
     private var mCanvas : Canvas? = null
     public var mPath = ArrayList<Path>()
     private var mPaint: Paint = Paint()
+    public var mPointer = ArrayList<Path>()
+    public var PointerX = ArrayList<Float>()
+    public var PointerY = ArrayList<Float>()
+    public var PointerVisible = ArrayList<Boolean>()
     public var mX = ArrayList<Float>()
     public var mY = ArrayList<Float>()
     public var Finished = ArrayList<Boolean>()
     public var lineNum = "0"
+    public var PointerNum = "0"
+    public var myPointer = "0"
     private var eraseX = 0f
     private var eraseY = 0f
     private var myNum = "0"
     public var penOption = 0
-    private var erasePath = Path()
     val database : FirebaseDatabase = FirebaseDatabase.getInstance()  // firebase db의 인스턴스를 가져옴
 
     var text_view : TextView? = null
@@ -62,6 +67,9 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         for(i in mPath) {
+            canvas!!.drawPath(i, mPaint)
+        }
+        for(i in mPointer){
             canvas!!.drawPath(i, mPaint)
         }
 
@@ -120,6 +128,23 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
 
     public fun ErasePath(pathIndex : Int) {
         mPath[pathIndex].reset()
+        invalidate()
+    }
+
+    fun clearPointer(pointerIndex : Int){
+        PointerVisible[pointerIndex] = false
+        mPointer[pointerIndex].reset()
+        invalidate()
+    }
+
+    fun setPointer(pointerIndex : Int, x : Float, y : Float){
+        if(!PointerVisible[pointerIndex]) return
+
+        PointerX[pointerIndex] = x
+        PointerY[pointerIndex] = y
+        mPointer[pointerIndex].reset()
+        mPointer[pointerIndex].addCircle(x, y, 50f, Path.Direction.CW)
+        PointerVisible[pointerIndex] = true;
         invalidate()
     }
 
@@ -217,6 +242,8 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
                 eraseX += 6 * dx
                 eraseY += 6 * dy
             }
+        }else if(penOption == 2){
+            database.getReference(RoomNumber).child("POINTERS").child(myPointer).setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "NUM" to myPointer))
         }
 
         return true
