@@ -51,6 +51,7 @@ class CanvasActivity : AppCompatActivity(){
     private var mMediaRecorder: MediaRecorder? = null
     private val REQUEST_PERMISSION_KEY : Int = 1
     internal var isRecording = false
+    var recordItem : MenuItem? = null
 
     
     /////
@@ -299,11 +300,13 @@ class CanvasActivity : AppCompatActivity(){
     private fun shareScreen(){
         if(mMediaProjection == null){
             startActivityForResult(mProjectionManager?.createScreenCaptureIntent(), REQUEST_CODE)
+            mMediaRecorder?.reset()
             return
         }
         mVirtualDisplay = createVirtualDisplay()
         mMediaRecorder?.start()
         isRecording = true
+        recordItem?.title = "녹화 중지"
         //actionBtnReload()
     }
     private fun createVirtualDisplay(): VirtualDisplay? {
@@ -342,6 +345,7 @@ class CanvasActivity : AppCompatActivity(){
         mVirtualDisplay!!.release()
         destroyMediaProjection()
         isRecording = false
+        recordItem?.title = "녹화 시작"
         //actionBtnReload()
     }
 
@@ -383,9 +387,10 @@ class CanvasActivity : AppCompatActivity(){
             //녹화
             REQUEST_PERMISSION_KEY -> {
                 if (grantResults.size > 0 && grantResults[0] + grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                    onToggleScreenShare()
+                    //onToggleScreenShare()
                 } else {
                     isRecording = false
+                    recordItem?.title = "녹화 시작"
                     //actionBtnReload()
                     Snackbar.make(
                         findViewById(android.R.id.content),
@@ -414,6 +419,7 @@ class CanvasActivity : AppCompatActivity(){
         override fun onStop() {
             if (isRecording) {
                 isRecording = false
+                recordItem?.title = "녹화 시작"
                 //actionBtnReload()
                 mMediaRecorder?.stop()
                 mMediaRecorder?.reset()
@@ -466,6 +472,7 @@ class CanvasActivity : AppCompatActivity(){
                 if (resultCode != RESULT_OK) {
                     Toast.makeText(this, "Screen Cast Permission Denied", Toast.LENGTH_SHORT).show()
                     isRecording = false
+                    recordItem?.title = "녹화 시작"
                     //actionBtnReload()
                     return
                 }
@@ -475,6 +482,7 @@ class CanvasActivity : AppCompatActivity(){
                 mVirtualDisplay = createVirtualDisplay()
                 mMediaRecorder?.start()
                 isRecording = true
+                recordItem?.title = "녹화 중지"
                 //actionBtnReload()
             }
         }
@@ -540,13 +548,8 @@ class CanvasActivity : AppCompatActivity(){
             }
 
             R.id.recording -> {
+                recordItem = item
                 onToggleScreenShare()
-                if (item.title == "녹화 시작"){
-                    item.title = "녹화 중지"
-                }
-                else{
-                    item.title = "녹화 시작"
-                }
             }
 
             R.id.pen -> {
