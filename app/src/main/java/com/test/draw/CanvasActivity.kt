@@ -27,6 +27,7 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.OnProgressListener
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
 import kotlinx.android.synthetic.main.activity_canvas.*
@@ -519,6 +520,7 @@ class CanvasActivity : AppCompatActivity(){
             val storageRef : StorageReference = storage.getReferenceFromUrl("gs://fir-c771c.appspot.com/").child("images/" + filename)
             storageRef.putFile(filePath!!)
                 .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot> { database.getReference(canvasView.RoomNumber).child("imageName").child("image").setValue(filename)})
+                .addOnProgressListener(OnProgressListener { Toast.makeText(thisContext, "사진을 업로드 중입니다.", Toast.LENGTH_SHORT).show() })
         }
     }
     private fun downloadFile(){
