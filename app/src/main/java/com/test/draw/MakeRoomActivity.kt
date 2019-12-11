@@ -22,7 +22,7 @@ class MakeRoomActivity : AppCompatActivity(){
 
         val RoomText = findViewById<TextView>(R.id.MakeRoomText)
         val PasswordText = findViewById<EditText>(R.id.MakePassword)
-        val NicknameText = findViewById<EditText>(R.id.MakeNickName)
+        //val NicknameText = findViewById<EditText>(R.id.MakeNickName)
         val database : FirebaseDatabase = FirebaseDatabase.getInstance()
         var RoomNumber = 1L;
 
@@ -49,7 +49,7 @@ class MakeRoomActivity : AppCompatActivity(){
         })
 
         create_room_button.setOnClickListener{
-            if(!RoomText.text.isNullOrEmpty() && !NicknameText.text.isNullOrEmpty()) {
+            if(!RoomText.text.isNullOrEmpty()) {
                 database.getReference("ROOMSINFO").child("" + RoomNumber).setValue(PasswordText.text.toString())
                 database.getReference(RoomText.text.toString()).child("PEOPLENUMBER").setValue(0)
                 database.getReference(RoomText.text.toString()).child("imageName").setValue("")
@@ -58,7 +58,6 @@ class MakeRoomActivity : AppCompatActivity(){
                 startActivity(intent)
             }else{
                 if(RoomText.text.isNullOrBlank()) Toast.makeText(this,"방 번호를 입력하세요.",Toast.LENGTH_SHORT).show()
-                else if(NicknameText.text.isNullOrBlank()) Toast.makeText(this,"닉네임을 입력하세요.",Toast.LENGTH_SHORT).show()
             }
         }
 

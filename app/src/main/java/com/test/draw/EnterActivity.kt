@@ -23,7 +23,7 @@ class EnterActivity : AppCompatActivity(){
 
         val RoomText = findViewById<EditText>(R.id.EnterRoomText)
         val PasswordText = findViewById<EditText>(R.id.EnterPassword)
-        val NicknameText = findViewById<EditText>(R.id.EnterNickName)
+        //val NicknameText = findViewById<EditText>(R.id.EnterNickName)
         val ThisClass = this
 
         //canvasView = findViewById(R.id.canvas)
@@ -60,11 +60,10 @@ class EnterActivity : AppCompatActivity(){
         }
 
         create_room_button.setOnClickListener{
-            if(!RoomText.text.isNullOrEmpty() && !NicknameText.text.isNullOrEmpty()) {
+            if(!RoomText.text.isNullOrEmpty()) {
                 Check()
             }else{
                 if(RoomText.text.isNullOrEmpty()) Toast.makeText(this,"방 번호를 입력하세요.",Toast.LENGTH_SHORT).show()
-                else if(NicknameText.text.isNullOrEmpty()) Toast.makeText(this,"닉네임을 입력하세요.",Toast.LENGTH_SHORT).show()
             }
         }
     }
