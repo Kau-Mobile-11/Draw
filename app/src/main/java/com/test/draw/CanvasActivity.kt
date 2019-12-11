@@ -36,7 +36,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class CanvasActivity : AppCompatActivity(){
-    /////recording
+    /////녹화
     private val TAG : String = "MainActivity"
     private val REQUEST_CODE : Int= 1002
     private var mScreenDensity: Int = 0
@@ -51,9 +51,8 @@ class CanvasActivity : AppCompatActivity(){
     private val thisContext = this
     internal var isRecording = false
     var recordItem : MenuItem? = null
-
-
     /////
+
     var RoomNumber : String = ""
     private var filePath : Uri? = null
     val storage : FirebaseStorage = FirebaseStorage.getInstance()
@@ -129,6 +128,7 @@ class CanvasActivity : AppCompatActivity(){
                     or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                     or View.SYSTEM_UI_FLAG_FULLSCREEN
                 )
+        //네비게이션바, 상단바 숨김
         setContentView(R.layout.activity_canvas)
 
         RoomNumber = intent.getStringExtra("ROOMNUMBER")
@@ -216,7 +216,7 @@ class CanvasActivity : AppCompatActivity(){
             }
         })
 
-        database.getReference(RoomNumber).child("imageName").addChildEventListener(object : ChildEventListener{
+        database.getReference(RoomNumber).child("imageName").addChildEventListener(object : ChildEventListener{     //DB에 업로드할 이미지의 이름을 추가
             override fun onCancelled(p0: DatabaseError) {
                 TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
             }
@@ -240,7 +240,7 @@ class CanvasActivity : AppCompatActivity(){
                     downloadFile()
                 }
             }
-
+            //DB에 이미지의 이름이 추가되거나 바뀌면 downloadFile 함수 호출
             override fun onChildRemoved(p0: DataSnapshot) {
                 image_view.setImageResource(0)
             }
@@ -292,13 +292,13 @@ class CanvasActivity : AppCompatActivity(){
         ////녹화
         val PERMISSIONS = arrayOf(
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.RECORD_AUDIO
         )
         if (!Function().hasPermissions(this, PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, REQUEST_PERMISSION_KEY)
         }
-
-
+        //권한 확인
         val metrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(metrics)
         mScreenDensity = metrics.densityDpi
@@ -307,9 +307,11 @@ class CanvasActivity : AppCompatActivity(){
 
         mProjectionManager =
             getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-
+            //getSystemService를 통해 서비스를 생성
         ////
     }
+
+
     ///////// 녹화
     private fun onToggleScreenShare() {
         if(!isRecording){
@@ -322,14 +324,37 @@ class CanvasActivity : AppCompatActivity(){
             stopScreenSharing()
         }
     }
+    //녹화를 위한 세팅
+    private fun initRecorder(){
+        try{
+            val formatter : SimpleDateFormat = SimpleDateFormat("yyyyMMHH_mmss")
+            val now : Date = Date()
+            var Videoname = formatter.format(now) + ".mp4"
 
+            mMediaRecorder?.apply{
+                setAudioSource(MediaRecorder.AudioSource.MIC)
+                setVideoSource(MediaRecorder.VideoSource.SURFACE)
+                setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                setOutputFile("${externalCacheDir.absolutePath}"+Videoname)
+                setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
+                setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP)
+                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                setVideoEncodingBitRate(512 * 1000)
+                setVideoFrameRate(16) // 30
+                setVideoEncodingBitRate(3000000)
+            }
+            mMediaRecorder?.prepare()   //위 set들이 모두 정상적으로 성공하면 녹화 준비
+        }catch (e : IOException){
+            e.printStackTrace()
+        }
+    }
     private fun shareScreen(){
         if(mMediaProjection == null){
             startActivityForResult(mProjectionManager?.createScreenCaptureIntent(), REQUEST_CODE)
             return
-        }
+        }//권한요청
         mVirtualDisplay = createVirtualDisplay()
-        mMediaRecorder?.start()
+        mMediaRecorder?.start() //녹화 시작
         isRecording = true
         recordItem?.title = "녹화 중지"
         Toast.makeText(thisContext,"녹화를 시작합니다.", Toast.LENGTH_SHORT).show()
@@ -339,61 +364,98 @@ class CanvasActivity : AppCompatActivity(){
             "MainActivity", DISPLAY_WIDTH, DISPLAY_HEIGHT, mScreenDensity,
             DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mMediaRecorder?.surface, null, null
         )
-    }
-
-    private fun initRecorder(){
-        try{
-            val formatter : SimpleDateFormat = SimpleDateFormat("yyyyMMHH_mmss")
-            val now : Date = Date()
-            var Videoname = formatter.format(now) + ".mp4"
-
-            mMediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
-            mMediaRecorder?.setVideoSource(MediaRecorder.VideoSource.SURFACE)
-            mMediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4) //THREE_GPP
-            mMediaRecorder?.setOutputFile("${externalCacheDir.absolutePath}"+Videoname)
-            mMediaRecorder?.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
-            mMediaRecorder?.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP)
-            mMediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            mMediaRecorder?.setVideoEncodingBitRate(512 * 1000)
-            mMediaRecorder?.setVideoFrameRate(16) // 30
-            mMediaRecorder?.setVideoEncodingBitRate(3000000)
-            mMediaRecorder?.prepare()
-        }catch (e : IOException){
-            e.printStackTrace()
-        }
-    }
-
+    }//화면 녹화를 위해 surface를 받아와 virtualDisplay 생성
     private fun stopScreenSharing(){
         if (mVirtualDisplay == null){
             return
         }
-        mVirtualDisplay!!.release()
+        mVirtualDisplay!!.release() //객체와 관련된 리소스 해제
         destroyMediaProjection()
         isRecording = false
         recordItem?.title = "녹화 시작"
         Toast.makeText(thisContext,"녹화를 중지합니다.", Toast.LENGTH_SHORT).show()
     }
-
-    private fun destroyMediaProjection(){
+    private fun destroyMediaProjection(){   //media projection 해제, 정지, null
         if(mMediaProjection != null){
-            mMediaProjection!!.unregisterCallback(mMediaProjectionCallback)
+            mMediaProjection!!.unregisterCallback(mMediaProjectionCallback) //해제
             mMediaProjection!!.stop()
             mMediaProjection = null
         }
         Log.i(TAG, "MediaProjection Stopped")
     }
-
+    //media projection 세션이 더 이상 유효하지 않을 때 onStop() 호출
+    private inner class MediaProjectionCallback : MediaProjection.Callback() {
+        override fun onStop() {
+            if (isRecording) {
+                isRecording = false
+                recordItem?.title = "녹화 시작"
+                Toast.makeText(thisContext,"녹화를 중지합니다.", Toast.LENGTH_SHORT).show()
+                mMediaRecorder?.stop()
+                mMediaRecorder?.reset()
+            }
+            mMediaProjection = null
+            stopScreenSharing()
+        }
+    }
+    override fun onDestroy(){
+        super.onDestroy()
+        destroyMediaProjection()
+    }
+    //녹화 도중 뒤로가기를 하면 녹화 중지를 한다
+    override fun onBackPressed() {
+        if (isRecording){
+            Snackbar.make(findViewById(android.R.id.content), "녹화를 중지하고 나가시겠습니까?",
+                Snackbar.LENGTH_INDEFINITE).setAction("중지") {
+                mMediaRecorder?.stop()
+                mMediaRecorder?.reset()
+                Log.v(TAG, "Stopping Recording")
+                stopScreenSharing()
+                finish()
+            }.show()
+        }else{
+            finish()
+        }
+    }
     /////////
 
+
+    ///////// 사진 첨부
     private fun pickImageFromGallery(){
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         startActivityForResult(intent, IMAGE_PICK_CODE)
     }
+    //static
     companion object{
         private const val IMAGE_PICK_CODE = 1000
         private const val PERMISSION_CODE = 1001
     }
+    private fun uploadFile(){
+        if (filePath != null){
+            val formatter : SimpleDateFormat = SimpleDateFormat("yyyyMMHH_mmss")
+            val now : Date = Date()
+            filename = formatter.format(now) + ".png"
+            //업로드할 사진의 고유 이름 생성
+            val storageRef : StorageReference = storage.getReferenceFromUrl("gs://fir-c771c.appspot.com/").child("images/" + filename)
+            storageRef.putFile(filePath!!)
+                .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot> { database.getReference(canvasView.RoomNumber).child("imageName").child("image").setValue(filename)})
+                .addOnProgressListener(OnProgressListener { Toast.makeText(thisContext, "사진을 업로드 중입니다.", Toast.LENGTH_SHORT).show() })
+        }
+    }
+    private fun downloadFile(){
+        val storageRef : StorageReference = storage.reference.child("images").child(filename)
+        var ONE_MEGABYTE: Long = 1024 * 1024
+        storageRef.getBytes(ONE_MEGABYTE).addOnCompleteListener {
+            image_view.setImageBitmap(byteArrayToBitmap(it.result!!))       //storage에서 사진을 받아와 set
+            Toast.makeText(this,"사진 공유 성공", Toast.LENGTH_SHORT).show()
+        }
+    }
+    private fun byteArrayToBitmap(byteArry: ByteArray): Bitmap? {
+        var bitmap: Bitmap? = BitmapFactory.decodeByteArray(byteArry,0,byteArry.size)
+        return bitmap
+    }
+    /////////
+
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -401,6 +463,7 @@ class CanvasActivity : AppCompatActivity(){
         grantResults: IntArray
     ) {
         when(requestCode){
+            //사진 첨부
             PERMISSION_CODE -> {
                 if(grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     pickImageFromGallery()
@@ -421,61 +484,26 @@ class CanvasActivity : AppCompatActivity(){
                         findViewById(android.R.id.content),
                         "마이크와 저장소 권한을 허용해주세요.",
                         Snackbar.LENGTH_INDEFINITE
-                    ).setAction("ENABLE",
-                        View.OnClickListener {
-                            val intent = Intent()
-                            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                            intent.addCategory(Intent.CATEGORY_DEFAULT)
-                            intent.data = Uri.parse("package:$packageName")
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                            startActivity(intent)
-                        }).show()
+                    ).setAction("ENABLE"
+                    ) {
+                        val intent = Intent().apply{
+                            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                            addCategory(Intent.CATEGORY_DEFAULT)
+                            data = Uri.parse("package:$packageName")
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                            addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                        }
+                        startActivity(intent)
+                    }.show()
                 }
                 return
             }
         }
-
-        ////
     }
-    ////녹화
-    private inner class MediaProjectionCallback : MediaProjection.Callback() {
-        override fun onStop() {
-            if (isRecording) {
-                isRecording = false
-                recordItem?.title = "녹화 시작"
-                Toast.makeText(thisContext,"녹화를 중지합니다.", Toast.LENGTH_SHORT).show()
-                mMediaRecorder?.stop()
-                mMediaRecorder?.reset()
-            }
-            mMediaProjection = null
-            stopScreenSharing()
-        }
-    }
-
-    override fun onDestroy(){
-        super.onDestroy()
-        destroyMediaProjection()
-    }
-    override fun onBackPressed() {
-        if (isRecording){
-            Snackbar.make(findViewById(android.R.id.content), "녹화를 중지하고 나가시겠습니까?",
-            Snackbar.LENGTH_INDEFINITE).setAction("중지") {
-                mMediaRecorder?.stop()
-                mMediaRecorder?.reset()
-                Log.v(TAG, "Stopping Recording")
-                stopScreenSharing()
-                finish()
-            }.show()
-        }else{
-            finish()
-        }
-    }
-    ////
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when(requestCode) {
+            //사진 첨부
             IMAGE_PICK_CODE -> {
                 if (resultCode == Activity.RESULT_OK && requestCode == IMAGE_PICK_CODE) {
                     if (data != null) {
@@ -484,8 +512,7 @@ class CanvasActivity : AppCompatActivity(){
                     uploadFile()
                 }
             }
-
-                //// 녹화
+            // 녹화
             REQUEST_CODE -> {
                 if (requestCode != REQUEST_CODE) {
                     Log.e(TAG, "Unknown request code: $requestCode")
@@ -508,34 +535,8 @@ class CanvasActivity : AppCompatActivity(){
                 Toast.makeText(thisContext,"녹화를 시작합니다.", Toast.LENGTH_SHORT).show()
             }
         }
-        ////
     }
-    private fun uploadFile(){
-        if (filePath != null){
 
-            val formatter : SimpleDateFormat = SimpleDateFormat("yyyyMMHH_mmss")
-            val now : Date = Date()
-
-            filename = formatter.format(now) + ".png"
-            val storageRef : StorageReference = storage.getReferenceFromUrl("gs://fir-c771c.appspot.com/").child("images/" + filename)
-            storageRef.putFile(filePath!!)
-                .addOnSuccessListener(OnSuccessListener<UploadTask.TaskSnapshot> { database.getReference(canvasView.RoomNumber).child("imageName").child("image").setValue(filename)})
-                .addOnProgressListener(OnProgressListener { Toast.makeText(thisContext, "사진을 업로드 중입니다.", Toast.LENGTH_SHORT).show() })
-        }
-    }
-    private fun downloadFile(){
-        val storageRef : StorageReference = storage.reference.child("images").child(filename)
-        var ONE_MEGABYTE: Long = 1024 * 1024
-        storageRef.getBytes(ONE_MEGABYTE).addOnCompleteListener {
-            image_view.setImageBitmap(byteArrayToBitmap(it.result!!))
-            Toast.makeText(this,"사진 공유 성공", Toast.LENGTH_SHORT).show()
-        }
-    }
-    private fun byteArrayToBitmap(byteArry: ByteArray): Bitmap {
-        var bitmap:Bitmap?=null
-        bitmap = BitmapFactory.decodeByteArray(byteArry,0,byteArry.size)
-        return bitmap
-    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
