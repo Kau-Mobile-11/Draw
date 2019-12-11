@@ -19,16 +19,8 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
     public var PointerX = ArrayList<Float>()
     public var PointerY = ArrayList<Float>()
     public var PointerVisible = ArrayList<Boolean>()
-    public var mX = ArrayList<Float>()
-    public var mY = ArrayList<Float>()
-    public var Finished = ArrayList<Boolean>()
-    public var lineNum = "0"
     public var PointerNum = "0"
     public var myPointer = "0"
-    private var eraseX = 0f
-    private var eraseY = 0f
-    private var myNum = "0"
-    public var penOption = 0
     var mX = ArrayList<Float>()
     var mY = ArrayList<Float>()
     var Finished = ArrayList<Boolean>()
