@@ -315,10 +315,14 @@ class CanvasActivity : AppCompatActivity(){
 
     private fun initRecorder(){
         try{
+            val formatter : SimpleDateFormat = SimpleDateFormat("yyyyMMHH_mmss")
+            val now : Date = Date()
+            var Videoname = formatter.format(now) + ".mp4"
+
             mMediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
             mMediaRecorder?.setVideoSource(MediaRecorder.VideoSource.SURFACE)
             mMediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4) //THREE_GPP
-            mMediaRecorder?.setOutputFile("${externalCacheDir.absolutePath}/video.mp4")
+            mMediaRecorder?.setOutputFile("${externalCacheDir.absolutePath}"+Videoname)
             mMediaRecorder?.setVideoSize(DISPLAY_WIDTH, DISPLAY_HEIGHT)
             mMediaRecorder?.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP)
             mMediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
@@ -537,6 +541,12 @@ class CanvasActivity : AppCompatActivity(){
 
             R.id.recording -> {
                 onToggleScreenShare()
+                if (item.title == "녹화 시작"){
+                    item.title = "녹화 중지"
+                }
+                else{
+                    item.title = "녹화 시작"
+                }
             }
 
             R.id.pen -> {
