@@ -49,6 +49,7 @@ class MakeRoomActivity : AppCompatActivity(){
                 val intent = Intent(this, CanvasActivity::class.java)
                 intent.putExtra("ROOMNUMBER", RoomText.text.toString())
                 startActivity(intent)
+                finish()
             }else{
                 if(RoomText.text.isNullOrBlank()) Toast.makeText(this,"방 번호를 입력하세요.",Toast.LENGTH_SHORT).show()
             }

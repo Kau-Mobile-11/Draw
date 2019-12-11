@@ -47,10 +47,11 @@ class CanvasActivity : AppCompatActivity(){
     private var mMediaProjectionCallback: MediaProjectionCallback? = null
     private var mMediaRecorder: MediaRecorder? = null
     private val REQUEST_PERMISSION_KEY : Int = 1
+    private val thisContext = this
     internal var isRecording = false
     var recordItem : MenuItem? = null
 
-    
+
     /////
     var RoomNumber : String = ""
     private var filePath : Uri? = null
@@ -121,6 +122,7 @@ class CanvasActivity : AppCompatActivity(){
     lateinit var canvasView: CanvasView
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         window.decorView.systemUiVisibility = ( View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
@@ -310,6 +312,7 @@ class CanvasActivity : AppCompatActivity(){
     ///////// 녹화
     private fun onToggleScreenShare() {
         if(!isRecording){
+            mMediaRecorder?.reset()
             initRecorder()
             shareScreen()
         }else{
@@ -322,13 +325,13 @@ class CanvasActivity : AppCompatActivity(){
     private fun shareScreen(){
         if(mMediaProjection == null){
             startActivityForResult(mProjectionManager?.createScreenCaptureIntent(), REQUEST_CODE)
-            mMediaRecorder?.reset()
             return
         }
         mVirtualDisplay = createVirtualDisplay()
         mMediaRecorder?.start()
         isRecording = true
         recordItem?.title = "녹화 중지"
+        Toast.makeText(thisContext,"녹화를 시작합니다.", Toast.LENGTH_SHORT).show()
     }
     private fun createVirtualDisplay(): VirtualDisplay? {
         return mMediaProjection?.createVirtualDisplay(
@@ -367,6 +370,7 @@ class CanvasActivity : AppCompatActivity(){
         destroyMediaProjection()
         isRecording = false
         recordItem?.title = "녹화 시작"
+        Toast.makeText(thisContext,"녹화를 중지합니다.", Toast.LENGTH_SHORT).show()
     }
 
     private fun destroyMediaProjection(){
@@ -401,7 +405,7 @@ class CanvasActivity : AppCompatActivity(){
                     pickImageFromGallery()
                 }
                 else{
-                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
                 }
             }
             //녹화
@@ -411,9 +415,10 @@ class CanvasActivity : AppCompatActivity(){
                 } else {
                     isRecording = false
                     recordItem?.title = "녹화 시작"
+                    Toast.makeText(thisContext,"녹화를 취소합니다.", Toast.LENGTH_SHORT).show()
                     Snackbar.make(
                         findViewById(android.R.id.content),
-                        "Please enable Microphone and Storage permissions.",
+                        "마이크와 저장소 권한을 허용해주세요.",
                         Snackbar.LENGTH_INDEFINITE
                     ).setAction("ENABLE",
                         View.OnClickListener {
@@ -439,6 +444,7 @@ class CanvasActivity : AppCompatActivity(){
             if (isRecording) {
                 isRecording = false
                 recordItem?.title = "녹화 시작"
+                Toast.makeText(thisContext,"녹화를 중지합니다.", Toast.LENGTH_SHORT).show()
                 mMediaRecorder?.stop()
                 mMediaRecorder?.reset()
             }
@@ -453,8 +459,8 @@ class CanvasActivity : AppCompatActivity(){
     }
     override fun onBackPressed() {
         if (isRecording){
-            Snackbar.make(findViewById(android.R.id.content), "Wanna Stop recording and exit?",
-            Snackbar.LENGTH_INDEFINITE).setAction("Stop") {
+            Snackbar.make(findViewById(android.R.id.content), "녹화를 중지하고 나가시겠습니까?",
+            Snackbar.LENGTH_INDEFINITE).setAction("중지") {
                 mMediaRecorder?.stop()
                 mMediaRecorder?.reset()
                 Log.v(TAG, "Stopping Recording")
@@ -485,9 +491,10 @@ class CanvasActivity : AppCompatActivity(){
                     return
                 }
                 if (resultCode != RESULT_OK) {
-                    Toast.makeText(this, "Screen Cast Permission Denied", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "녹화 권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
                     isRecording = false
                     recordItem?.title = "녹화 시작"
+                    Toast.makeText(thisContext,"녹화를 취소합니다.", Toast.LENGTH_SHORT).show()
                     return
                 }
                 mMediaProjectionCallback = MediaProjectionCallback()
@@ -497,6 +504,7 @@ class CanvasActivity : AppCompatActivity(){
                 mMediaRecorder?.start()
                 isRecording = true
                 recordItem?.title = "녹화 중지"
+                Toast.makeText(thisContext,"녹화를 시작합니다.", Toast.LENGTH_SHORT).show()
             }
         }
         ////
@@ -518,6 +526,7 @@ class CanvasActivity : AppCompatActivity(){
         var ONE_MEGABYTE: Long = 1024 * 1024
         storageRef.getBytes(ONE_MEGABYTE).addOnCompleteListener {
             image_view.setImageBitmap(byteArrayToBitmap(it.result!!))
+            Toast.makeText(this,"사진 공유 성공", Toast.LENGTH_SHORT).show()
         }
     }
     private fun byteArrayToBitmap(byteArry: ByteArray): Bitmap {
@@ -534,6 +543,7 @@ class CanvasActivity : AppCompatActivity(){
         when (item?.itemId){
             R.id.erase_all -> {
                 canvasView.ClearCanvas()
+                Toast.makeText(this,"지우기 성공", Toast.LENGTH_SHORT).show()
             }
 
             R.id.input_image -> {
@@ -553,26 +563,32 @@ class CanvasActivity : AppCompatActivity(){
 
             R.id.image_delete ->{
                 database.getReference(RoomNumber).child("imageName").removeValue()
+                Toast.makeText(this,"이미지 지우기 성공", Toast.LENGTH_SHORT).show()
             }
 
             R.id.recording -> {
+                recordItem = item
                 onToggleScreenShare()
             }
 
             R.id.pen -> {
                 canvasView.penOption = 0
+                Toast.makeText(this,"펜 선택", Toast.LENGTH_SHORT).show()
             }
             R.id.erase -> {
                 canvasView.penOption = 1
+                Toast.makeText(this,"지우개 선택", Toast.LENGTH_SHORT).show()
             }
             R.id.pointer -> {
                 canvasView.penOption = 2;
                 canvasView.myPointer = canvasView.PointerNum
                 database.getReference(RoomNumber).child("POINTERNUM").setValue(Integer.parseInt(canvasView.PointerNum) + 1)
+                Toast.makeText(this,"마우스 포인터 선택", Toast.LENGTH_SHORT).show()
             }
             R.id.erase_pointer -> {
                 if(Integer.parseInt(canvas.PointerNum) != 0)
                     database.getReference(RoomNumber).child("ERASE").push().setValue(Integer.parseInt(canvas.PointerNum) + 10000000 - 1)
+                Toast.makeText(this,"포인터 지우기 성공", Toast.LENGTH_SHORT).show()
             }
         }
         return super.onOptionsItemSelected(item)
