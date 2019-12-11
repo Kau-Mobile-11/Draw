@@ -198,15 +198,18 @@ class CanvasActivity : AppCompatActivity(){
             }
 
             override fun onDataChange(p0: DataSnapshot) {
-                val value = p0.value as Long
+                try {
+                    val value = p0.value as Long
 
-                canvasView.PointerNum = "" + value
+                    canvasView.PointerNum = "" + value
 
-                database.getReference(RoomNumber).child("POINTERS").child("" + (value - 1)).addValueEventListener(PointListener)
-                canvas.mPointer.add(Path())
-                canvasView.PointerX.add(0.toFloat())
-                canvasView.PointerY.add(0.toFloat())
-                canvasView.PointerVisible.add(true)
+                    database.getReference(RoomNumber).child("POINTERS").child("" + (value - 1))
+                        .addValueEventListener(PointListener)
+                    canvas.mPointer.add(Path())
+                    canvasView.PointerX.add(0.toFloat())
+                    canvasView.PointerY.add(0.toFloat())
+                    canvasView.PointerVisible.add(true)
+                }catch(e : Exception){}
             }
         })
 
@@ -259,7 +262,7 @@ class CanvasActivity : AppCompatActivity(){
 
                 if(option == -1L){
                     canvasView.removeAll()
-                }else if(option > 10000000) {
+                }else if(option >= 10000000) {
                     for(i in 10000000..option){
                         canvasView.clearPointer((i - 10000000).toInt())
                         database.getReference(RoomNumber).child("POINTERS").child((i - 10000000).toString()).removeValue()
@@ -568,7 +571,8 @@ class CanvasActivity : AppCompatActivity(){
                 database.getReference(RoomNumber).child("POINTERNUM").setValue(Integer.parseInt(canvasView.PointerNum) + 1)
             }
             R.id.erase_pointer -> {
-                database.getReference(RoomNumber).child("ERASE").push().setValue(Integer.parseInt(canvas.PointerNum) + 10000000 - 1)
+                if(Integer.parseInt(canvas.PointerNum) != 0)
+                    database.getReference(RoomNumber).child("ERASE").push().setValue(Integer.parseInt(canvas.PointerNum) + 10000000 - 1)
             }
         }
         return super.onOptionsItemSelected(item)

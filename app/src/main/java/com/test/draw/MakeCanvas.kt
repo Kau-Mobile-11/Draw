@@ -1,5 +1,6 @@
 package com.test.draw
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
@@ -7,6 +8,7 @@ import android.view.MotionEvent
 import android.view.View
 import com.google.firebase.database.*
 import android.graphics.RectF
+import android.util.Log
 
 class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(context, attrs) {
 
@@ -15,12 +17,12 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
     private var mCanvas : Canvas? = null
     var mPath = ArrayList<Path>()
     private var mPaint: Paint = Paint()
-    public var mPointer = ArrayList<Path>()
-    public var PointerX = ArrayList<Float>()
-    public var PointerY = ArrayList<Float>()
-    public var PointerVisible = ArrayList<Boolean>()
-    public var PointerNum = "0"
-    public var myPointer = "0"
+    var mPointer = ArrayList<Path>()
+    var PointerX = ArrayList<Float>()
+    var PointerY = ArrayList<Float>()
+    var PointerVisible = ArrayList<Boolean>()
+    var PointerNum = "0"
+    var myPointer = "0"
     var mX = ArrayList<Float>()
     var mY = ArrayList<Float>()
     var Finished = ArrayList<Boolean>()
@@ -66,7 +68,7 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
         Finished[num] = false
     }
 
-    public fun onMoveTouchEvent(x:Float, y:Float, num:Int) {
+    fun onMoveTouchEvent(x:Float, y:Float, num:Int) {
         if(Finished[num]) return;
 
         val dx = Math.abs(x - mX[num])
@@ -125,17 +127,18 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
         val touchPointPath = Path()
         touchPointPath.addRect(touchPoint, Path.Direction.CW)
         for (i in 0..(mPath.size - 1)) {
-            val hourPath = mPath[i]
-            touchPointPath.addCircle(x, y, padding, Path.Direction.CW)
-            touchPointPath.close()
-            val hourPathCopy = Path(hourPath)
-            touchPointPath.reset()
-            val bounds = RectF()
-            hourPathCopy.computeBounds(bounds, true)
-            if (bounds.left.toDouble() != 0.0 && bounds.top.toDouble() != 0.0 && bounds.right.toDouble() != 0.0 && bounds.bottom.toDouble() != 0.0) {
-                database.getReference(RoomNumber).child("ERASE").push().setValue(i)
-                database.getReference(RoomNumber).child("PATHS").child("" + i).removeValue()
-            }
+                val hourPath = mPath[i]
+                touchPointPath.addCircle(x, y, padding, Path.Direction.CW)
+                touchPointPath.close()
+                val hourPathCopy = Path(hourPath)
+                val intersectResult = hourPathCopy.op(touchPointPath, Path.Op.INTERSECT)
+                touchPointPath.reset()
+                val bounds = RectF()
+                hourPathCopy.computeBounds(bounds, true)
+                if (bounds.left.toDouble() != 0.0 && bounds.top.toDouble() != 0.0 && bounds.right.toDouble() != 0.0 && bounds.bottom.toDouble() != 0.0) {
+                    database.getReference(RoomNumber).child("ERASE").push().setValue(i)
+                    database.getReference(RoomNumber).child("PATHS").child("" + i).removeValue()
+                }
         }
     }
 
