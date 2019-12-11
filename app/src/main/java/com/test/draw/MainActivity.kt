@@ -16,10 +16,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //canvasView = findViewById(R.id.canvas)
-
-//        clearCanvas.setOnClickListener(ClearCanvas(canvasView) as View.OnClickListener)
-
         create.setOnClickListener{
             val intent = Intent(this, MakeRoomActivity::class.java)
             startActivity(intent)
@@ -30,10 +26,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
-
-//    fun ClearCanvas(view: View) {
-//        canvasView.ClearCanvas()
-//    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         return super.onCreateOptionsMenu(menu)

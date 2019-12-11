@@ -1,41 +1,19 @@
 package com.test.draw
 
-import android.content.ContentValues.TAG
 import android.content.Context
-import android.content.Intent.getIntent
-import android.content.Intent.getIntentOld
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import android.widget.TextView
 import com.google.firebase.database.*
-import kotlin.reflect.typeOf
-import android.R.attr.bottom
-import android.R.attr.right
-import android.R.attr.top
-import android.R.attr.left
 import android.graphics.RectF
-import android.R.attr.y
-import android.R.attr.x
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-
-
-
-
-
-
 
 class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(context, attrs) {
 
-    public var RoomNumber : String = ""
+    var RoomNumber : String = ""
     private var mbitmap : Bitmap? = null
     private var mCanvas : Canvas? = null
-    public var mPath = ArrayList<Path>()
+    var mPath = ArrayList<Path>()
     private var mPaint: Paint = Paint()
     public var mPointer = ArrayList<Path>()
     public var PointerX = ArrayList<Float>()
@@ -51,10 +29,15 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
     private var eraseY = 0f
     private var myNum = "0"
     public var penOption = 0
+    var mX = ArrayList<Float>()
+    var mY = ArrayList<Float>()
+    var Finished = ArrayList<Boolean>()
+    var lineNum = "0"
+    private var eraseX = 0f
+    private var eraseY = 0f
+    private var myNum = "0"
+    var penOption = 0
     val database : FirebaseDatabase = FirebaseDatabase.getInstance()  // firebase db의 인스턴스를 가져옴
-
-    var text_view : TextView? = null
-
 
     init {
         mPaint.isAntiAlias = true
@@ -84,13 +67,11 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
 
     }
 
-    public fun onStartTouchEvent(x: Float, y:Float, num:Int) {
+    fun onStartTouchEvent(x: Float, y:Float, num:Int) {
         mPath[num].moveTo(x,y)
         mX[num]=x
         mY[num]=y
-        Finished[num] = false;
-
-        //Log.d(TAG,"START")
+        Finished[num] = false
     }
 
     public fun onMoveTouchEvent(x:Float, y:Float, num:Int) {
@@ -105,14 +86,12 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
         }
     }
 
-    public fun upTouchEvent(num:Int){
+    fun upTouchEvent(num:Int){
         mPath[num].lineTo(mX[num],mY[num])
         Finished[num] = true
-
-        //Log.d(TAG,"FINISH")
     }
 
-    public fun removeAll(){
+    fun removeAll(){
         for(i in mPath){
             i.reset()
         }
@@ -126,7 +105,7 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
         }
     }
 
-    public fun ErasePath(pathIndex : Int) {
+    fun ErasePath(pathIndex : Int) {
         mPath[pathIndex].reset()
         invalidate()
     }
@@ -158,11 +137,9 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
             touchPointPath.addCircle(x, y, padding, Path.Direction.CW)
             touchPointPath.close()
             val hourPathCopy = Path(hourPath)
-            val intersectResult = hourPathCopy.op(touchPointPath, Path.Op.INTERSECT)
             touchPointPath.reset()
             val bounds = RectF()
             hourPathCopy.computeBounds(bounds, true)
-            //      Log.d(TAG, "intersectResult: " + intersectResult + " different?: " + bounds.left+","+bounds.top+","+bounds.right+","+bounds.bottom);
             if (bounds.left.toDouble() != 0.0 && bounds.top.toDouble() != 0.0 && bounds.right.toDouble() != 0.0 && bounds.bottom.toDouble() != 0.0) {
                 database.getReference(RoomNumber).child("ERASE").push().setValue(i)
                 database.getReference(RoomNumber).child("PATHS").child("" + i).removeValue()
@@ -174,49 +151,17 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
         val x = event.x
         val y = event.y
 
-        //database.getReference("x").push().setValue(x) //  push()를 쓰면 누적 저장
-        //database.getReference("y").push().setValue(y) //  위에 안쓴거는 계속 갱신
-
-//        database.getReference(RoomNumber).addValueEventListener(object : ValueEventListener {
-//            override fun onDataChange(p0: DataSnapshot) {
-//                var value = p0.value as Map<String, String>;
-//
-//                if(value.getValue("FIN").equals("T")) {
-//                    upTouchEvent()
-//                    invalidate()
-//                }else if(value.getValue("START").equals("T")){
-//                    onStartTouchEvent(value.getValue("X").toFloat(), value.getValue("Y").toFloat())
-//                    invalidate()
-//                }else{
-//                    onMoveTouchEvent(value.getValue("X").toFloat(), value.getValue("Y").toFloat())
-//                    invalidate()
-//                }
-//            }
-//
-//            override fun onCancelled(p0: DatabaseError) {
-//                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-//            }
-//
-//        })
-
         if(penOption == 0){
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-//                onStartTouchEvent(x, y)
-//                invalidate()
                     myNum = lineNum
                     database.getReference(RoomNumber).child("PEOPLENUMBER").setValue(Integer.parseInt(myNum).toLong() + 1)
                     database.getReference(RoomNumber).child("PATHS").child(""+myNum).push().setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "NUM" to myNum, "FIN" to "F", "START" to "T"))
                 }
                 MotionEvent.ACTION_MOVE -> {
-//                onMoveTouchEvent(x, y)
-//                invalidate()
-
                     database.getReference(RoomNumber).child("PATHS").child(""+myNum).push().setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "NUM" to myNum, "FIN" to "F", "START" to "F"))
                 }
                 MotionEvent.ACTION_UP -> {
-//                  upTouchEvent()
-//                  invalidate()
                     database.getReference(RoomNumber).child("PATHS").child(""+myNum).push().setValue(mapOf("X" to x.toFloat().toString(), "Y" to y.toFloat().toString(), "NUM" to myNum, "FIN" to "T", "START" to "F"))
                 }
 

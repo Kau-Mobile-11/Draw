@@ -2,7 +2,6 @@ package com.test.draw
 
 import android.Manifest
 import android.app.Activity
-import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -18,11 +17,9 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.service.autofill.Validators.or
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
-import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -286,28 +283,6 @@ class CanvasActivity : AppCompatActivity(){
             return
         }
 
-        /*
-        image_button.setOnClickListener {
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-                if(checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED){
-                    val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-                    requestPermissions(permissions, PERMISSION_CODE)
-                }
-                else{
-                    pickImageFromGallery()
-                }
-            }
-            else{
-                pickImageFromGallery()
-            }
-        }
-        */
-        /*
-        image_clear.setOnClickListener{
-            database.getReference(RoomNumber).child("imageName").removeValue()
-        }
-
-        */
         ////녹화
         val PERMISSIONS = arrayOf(
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -327,26 +302,9 @@ class CanvasActivity : AppCompatActivity(){
         mProjectionManager =
             getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
 
-        /*
-        record_button.setOnClickListener {
-            onToggleScreenShare()
-        }
-        */
-
         ////
-//        clearCanvas.setOnClickListener(ClearCanvas(canvasView) as View.OnClickListener)
-
     }
     ///////// 녹화
-    /*
-    fun actionBtnReload(){
-        if (isRecording){
-            record_button.setText("Stop")
-        }else{
-            record_button.setText("Start")
-        }
-    }
-    */
     private fun onToggleScreenShare() {
         if(!isRecording){
             initRecorder()
@@ -368,7 +326,6 @@ class CanvasActivity : AppCompatActivity(){
         mMediaRecorder?.start()
         isRecording = true
         recordItem?.title = "녹화 중지"
-        //actionBtnReload()
     }
     private fun createVirtualDisplay(): VirtualDisplay? {
         return mMediaProjection?.createVirtualDisplay(
@@ -407,7 +364,6 @@ class CanvasActivity : AppCompatActivity(){
         destroyMediaProjection()
         isRecording = false
         recordItem?.title = "녹화 시작"
-        //actionBtnReload()
     }
 
     private fun destroyMediaProjection(){
@@ -448,11 +404,10 @@ class CanvasActivity : AppCompatActivity(){
             //녹화
             REQUEST_PERMISSION_KEY -> {
                 if (grantResults.size > 0 && grantResults[0] + grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                    //onToggleScreenShare()
+
                 } else {
                     isRecording = false
                     recordItem?.title = "녹화 시작"
-                    //actionBtnReload()
                     Snackbar.make(
                         findViewById(android.R.id.content),
                         "Please enable Microphone and Storage permissions.",
@@ -481,7 +436,6 @@ class CanvasActivity : AppCompatActivity(){
             if (isRecording) {
                 isRecording = false
                 recordItem?.title = "녹화 시작"
-                //actionBtnReload()
                 mMediaRecorder?.stop()
                 mMediaRecorder?.reset()
             }
@@ -508,7 +462,6 @@ class CanvasActivity : AppCompatActivity(){
             finish()
         }
     }
-
     ////
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -519,8 +472,6 @@ class CanvasActivity : AppCompatActivity(){
                         filePath = data.data
                     }
                     uploadFile()
-
-                    //image_view.setImageURI(data?.data)
                 }
             }
 
@@ -534,7 +485,6 @@ class CanvasActivity : AppCompatActivity(){
                     Toast.makeText(this, "Screen Cast Permission Denied", Toast.LENGTH_SHORT).show()
                     isRecording = false
                     recordItem?.title = "녹화 시작"
-                    //actionBtnReload()
                     return
                 }
                 mMediaProjectionCallback = MediaProjectionCallback()
@@ -544,7 +494,6 @@ class CanvasActivity : AppCompatActivity(){
                 mMediaRecorder?.start()
                 isRecording = true
                 recordItem?.title = "녹화 중지"
-                //actionBtnReload()
             }
         }
         ////
@@ -567,17 +516,12 @@ class CanvasActivity : AppCompatActivity(){
         storageRef.getBytes(ONE_MEGABYTE).addOnCompleteListener {
             image_view.setImageBitmap(byteArrayToBitmap(it.result!!))
         }
-        //GlideApp.with(this).load(storageRef).into(image_view)
     }
     private fun byteArrayToBitmap(byteArry: ByteArray): Bitmap {
         var bitmap:Bitmap?=null
         bitmap = BitmapFactory.decodeByteArray(byteArry,0,byteArry.size)
         return bitmap
     }
-
-//    fun ClearCanvas(view: View) {
-//        canvasView.ClearCanvas()
-//    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
@@ -609,7 +553,6 @@ class CanvasActivity : AppCompatActivity(){
             }
 
             R.id.recording -> {
-                recordItem = item
                 onToggleScreenShare()
             }
 
@@ -629,13 +572,5 @@ class CanvasActivity : AppCompatActivity(){
             }
         }
         return super.onOptionsItemSelected(item)
-
-
-
-        //when(item?.itemId) {
-        //    R.id.erase -> canvasView.ClearCanvas()
-        //}
-
-        //return super.onOptionsItemSelected(item)
     }
 }

@@ -16,12 +16,15 @@
                 android:id="@+id/MakeRoomText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="150dp"
                 android:ems="10"
+                android:gravity="center"
                 android:hint="방 번호 설정"
                 android:importantForAutofill="no"
                 android:inputType="number"
-                app:layout_constraintBottom_toTopOf="@id/roompass"
+                app:layout_constraintBottom_toTopOf="@id/MakePassword"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.497"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toLeftOf="@id/create_room_button"
                 app:layout_constraintStart_toStartOf="parent"
@@ -33,53 +36,25 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="비밀번호 설정"
+                android:gravity="center"
                 android:inputType="textPassword"
-                app:layout_constraintBottom_toTopOf="@id/passnick"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/roompass" />
-
-        <EditText
-                android:id="@+id/MakeNickName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="닉네임 설정"
-                android:inputType="textPersonName"
-                app:layout_constraintBottom_toTopOf="@+id/create_room_button"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/passnick" />
-
-        <Space
-                android:id="@+id/roompass"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toTopOf="@id/MakePassword"
+                app:layout_constraintBottom_toTopOf="@id/create_room_button"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/MakeRoomText" />
-
-        <Space
-                android:id="@+id/passnick"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toTopOf="@id/MakeNickName"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/MakePassword" />
 
         <Button
                 android:id="@+id/create_room_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="150dp"
+                android:gravity="center"
                 android:text="생성"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.498"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/MakeNickName" />
+                app:layout_constraintTop_toBottomOf="@id/MakePassword" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
