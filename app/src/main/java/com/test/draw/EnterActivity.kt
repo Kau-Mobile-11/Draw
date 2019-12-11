@@ -3,13 +3,9 @@ package com.test.draw
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.ContactsContract
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_create_room.*
@@ -23,12 +19,7 @@ class EnterActivity : AppCompatActivity(){
 
         val RoomText = findViewById<EditText>(R.id.EnterRoomText)
         val PasswordText = findViewById<EditText>(R.id.EnterPassword)
-        //val NicknameText = findViewById<EditText>(R.id.EnterNickName)
         val ThisClass = this
-
-        //canvasView = findViewById(R.id.canvas)
-
-//        clearCanvas.setOnClickListener(ClearCanvas(canvasView) as View.OnClickListener)
 
         fun Check() {
             val database : FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -68,9 +59,6 @@ class EnterActivity : AppCompatActivity(){
         }
     }
 
-//    fun ClearCanvas(view: View) {
-//        canvasView.ClearCanvas()
-//    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         return super.onCreateOptionsMenu(menu)

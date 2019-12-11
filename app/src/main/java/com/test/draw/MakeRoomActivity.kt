@@ -3,10 +3,8 @@ package com.test.draw
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
@@ -22,15 +20,10 @@ class MakeRoomActivity : AppCompatActivity(){
 
         val RoomText = findViewById<TextView>(R.id.MakeRoomText)
         val PasswordText = findViewById<EditText>(R.id.MakePassword)
-        //val NicknameText = findViewById<EditText>(R.id.MakeNickName)
         val database : FirebaseDatabase = FirebaseDatabase.getInstance()
         var RoomNumber = 1L;
 
         RoomText.text = ""
-
-        //canvasView = findViewById(R.id.canvas)
-
-//        clearCanvas.setOnClickListener(ClearCanvas(canvasView) as View.OnClickListener)
 
         database.getReference("ROOMSNUMBER").addListenerForSingleValueEvent(object : ValueEventListener{
             override fun onCancelled(p0: DatabaseError) {
@@ -62,11 +55,6 @@ class MakeRoomActivity : AppCompatActivity(){
         }
 
     }
-
-//    fun ClearCanvas(view: View) {
-//        canvasView.ClearCanvas()
-//    }
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         return super.onCreateOptionsMenu(menu)
     }
