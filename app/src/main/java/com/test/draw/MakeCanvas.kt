@@ -17,6 +17,7 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
     private var mCanvas : Canvas? = null
     var mPath = ArrayList<Path>()
     private var mPaint: Paint = Paint()
+    private var mPointerPaint : Paint = Paint()
     var mPointer = ArrayList<Path>()
     var PointerX = ArrayList<Float>()
     var PointerY = ArrayList<Float>()
@@ -39,6 +40,12 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
         mPaint.style = Paint.Style.STROKE
         mPaint.strokeJoin = Paint.Join.ROUND
         mPaint.strokeWidth = 4f
+
+        mPointerPaint.isAntiAlias = true
+        mPointerPaint.color = Color.rgb(255,0,0)
+        mPointerPaint.style = Paint.Style.STROKE
+        mPointerPaint.strokeJoin = Paint.Join.ROUND
+        mPointerPaint.strokeWidth = 4f
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -47,7 +54,7 @@ class CanvasView(internal var context: Context, attrs : AttributeSet?) : View(co
             canvas!!.drawPath(i, mPaint)
         }
         for(i in mPointer){
-            canvas!!.drawPath(i, mPaint)
+            canvas!!.drawPath(i, mPointerPaint)
         }
 
     }
